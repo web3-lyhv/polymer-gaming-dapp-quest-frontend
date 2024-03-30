@@ -4,9 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
-import { useEthersProvider } from "@/ethers-provider";
 import { useEthersSigner } from "@/ethers-signer";
-import { useAccount } from "wagmi";
 
 const abi = [
   {
@@ -68,7 +66,6 @@ const abi = [
 ];
 
 function Points() {
-  const provider = useEthersProvider();
   const signer = useEthersSigner();
 
   // when the user clicks the "Spin Wheel" button, isRequesting will be set to true

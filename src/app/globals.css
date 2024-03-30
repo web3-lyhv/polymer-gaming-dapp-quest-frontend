@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.nft-card {
+  aspect-ratio: 1 / 1.2;
+}
+
+.nfts li {
+  display: none;
+}
+
+.nfts.visible-purchase .nft-mint {
+  display: grid;
+}
+
+.nfts.visible-my-nfts .nft-own {
+  display: grid;
+}
