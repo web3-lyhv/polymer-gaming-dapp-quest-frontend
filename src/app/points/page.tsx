@@ -5,8 +5,10 @@ import Footer from "@/components/Footer";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useEthersSigner } from "@/ethers-signer";
-import abi from "@/abis/points.json";
+import abi from "@/abis/XGamingUCAbi.json";
+import config from "../config.json";
 import { useAccount } from "wagmi";
+import { log } from "console";
 
 function Points() {
   const account = useAccount();
@@ -20,7 +22,7 @@ function Points() {
   // as the points received will be determined by the smart contract, we will need to
   // wait for the transaction to be mined before we can display the result
   // on the spin wheel
-  const [points, setPoints] = useState<null | number>(0);
+  const [points, setPolyToken] = useState<null | number>(0);
 
   // this is the dummy smart contract that I have deployed to optimism sepolia:
   // 0xE97994805b7a090d7D1222c2bd4C8D7e0799ef93
@@ -33,31 +35,33 @@ function Points() {
   // and emits an event when the points get added or deducted
   // - event PointsAdded(address indexed user, uint256 indexed points)
   // - event PointsDeducted(address indexed user, uint256 indexed points)
+  const destPortAddr = config.sendUniversalPacket.base.portAddr;
+  const channelIdBytes = ethers.encodeBytes32String(config.sendUniversalPacket.optimism.channelId);
+  const timeoutSeconds = config.sendUniversalPacket.optimism.timeout
 
   const spinWheel = async () => {
     // init contract with the address of the deployed contract
     try {
       const contract = new ethers.Contract(
-        "0xE97994805b7a090d7D1222c2bd4C8D7e0799ef93",
+        config.sendUniversalPacket.optimism.portAddr,
         abi,
         signer
       );
 
-      // listen to the event emitted by the contract
-      contract.on("PointsAdded", (addr, randomNumber) => {
+      //listen to the event emitted by the contract
+      contract.on("FaucetPolyAckReceived", (addr, randomNumber, message, event) => {
         if (addr === signer?.address) {
-          setPoints(Number(randomNumber));
+          setPolyToken(Number(randomNumber));
           setIsRequesting(false);
         }
       });
 
       setIsRequesting(true);
-      const tx = await contract.requestPoints();
-      await tx.wait();
+      await contract.faucetToken(destPortAddr, channelIdBytes, timeoutSeconds);
     } catch (e) {
       console.error(e);
       setIsRequesting(false);
-      setPoints(0);
+      setPolyToken(0);
     }
   };
 
