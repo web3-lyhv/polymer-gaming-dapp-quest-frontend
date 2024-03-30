@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useEthersSigner } from "@/ethers-signer";
 import abi from "@/abis/nft.json";
+import { useAccount } from "wagmi";
 
 const refunds = [
   {
@@ -27,6 +28,7 @@ const refunds = [
 ];
 
 function NFT() {
+  const account = useAccount();
   const signer = useEthersSigner();
   // I have deployed a Dummy NFT Contract: 0x7Bd8afD53eDfedAa6417C635083DEf53c5a03825 on Optimism Sepolia
   // https://sepolia-optimism.etherscan.io/address/0x7Bd8afD53eDfedAa6417C635083DEf53c5a03825#code
@@ -213,7 +215,10 @@ function NFT() {
                   <button
                     className="bg-black text-white text-center px-4 py-2 rounded-lg hover:scale-105 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
                     type="button"
-                    disabled={loadingForVariant[nft.variant - 1]}
+                    disabled={
+                      loadingForVariant[nft.variant - 1] ||
+                      account.status !== "connected"
+                    }
                     onClick={() => mint(nft.variant)}
                   >
                     {loadingForVariant[nft.variant - 1] ? (
@@ -262,7 +267,10 @@ function NFT() {
                   <button
                     className="bg-black text-white text-center px-4 py-2 rounded-lg hover:scale-105 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
                     type="button"
-                    disabled={loadingForBurningTokenId.includes(nft.tokenId)}
+                    disabled={
+                      loadingForBurningTokenId.includes(nft.tokenId) ||
+                      account.status !== "connected"
+                    }
                     onClick={() => burn(nft.tokenId)}
                   >
                     {loadingForBurningTokenId.includes(nft.tokenId) ? (
@@ -300,8 +308,9 @@ function NFT() {
             Feeling lucky? Try a Randomizer @ 0.0002 ETH
           </h5>
           <button
-            className="bg-black text-white text-center px-4 py-2 rounded-lg hover:scale-105 transition"
+            className="bg-black text-white text-center px-4 py-2 rounded-lg hover:scale-105 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
             type="button"
+            disabled={account.status !== "connected"}
           >
             Randomize
           </button>

@@ -6,8 +6,10 @@ import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useEthersSigner } from "@/ethers-signer";
 import abi from "@/abis/points.json";
+import { useAccount } from "wagmi";
 
 function Points() {
+  const account = useAccount();
   const signer = useEthersSigner();
 
   // when the user clicks the "Spin Wheel" button, isRequesting will be set to true
@@ -86,14 +88,20 @@ function Points() {
           </div>
           {/* {points !== null && <p>Points Added: {points}</p>} */}
 
-          <button
-            className="bg-black text-white text-center px-4 py-2 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
-            type="button"
-            onClick={spinWheel}
-            disabled={isRequesting}
-          >
-            {isRequesting ? "Spinning..." : "Spin Wheel"}
-          </button>
+          {account.status === "connected" ? (
+            <button
+              className="bg-black text-white text-center px-4 py-2 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
+              type="button"
+              onClick={spinWheel}
+              disabled={isRequesting}
+            >
+              {isRequesting ? "Spinning..." : "Spin Wheel"}
+            </button>
+          ) : (
+            <p className="text-red-500">
+              Please connect your wallet to spin the wheel
+            </p>
+          )}
         </div>
       </div>
       <Footer />
