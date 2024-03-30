@@ -1,7 +1,8 @@
 "use client";
 
-import Header from "../components/Header";
-import Footer from "../components/Footer";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import Link from "next/link";
 
 function App() {
   return (
@@ -10,12 +11,12 @@ function App() {
 
       <div className="flex justify-center items-center p-12 h-96 bg-slate-100">
         <div className="flex-1 text-center">
-          <a
-            href="#"
+          <Link
+            href="/points"
             className="bg-black text-white px-4 py-2 rounded-lg text-lg"
           >
             Spin Wheel
-          </a>
+          </Link>
         </div>
         <div className="flex-1">
           <h4 className="text-3xl">
@@ -29,23 +30,23 @@ function App() {
           <h4 className="text-3xl">Purchase NFTs with PolyERC20 Tokens</h4>
         </div>
         <div className="flex-1 text-center">
-          <a
-            href="#"
+          <Link
+            href="/nft"
             className="bg-black text-white px-4 py-2 rounded-lg text-lg"
           >
             Try now
-          </a>
+          </Link>
         </div>
       </div>
 
       <div className="flex justify-center items-center p-12 h-96 bg-slate-100">
         <div className="flex-1 text-center">
-          <a
-            href="#"
+          <Link
+            href="/leaderboard"
             className="bg-black text-white px-4 py-2 rounded-lg text-lg"
           >
-            Try Now
-          </a>
+            Check Leaderboard
+          </Link>
         </div>
         <div className="flex-1">
           <h4 className="text-3xl">
