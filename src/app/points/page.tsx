@@ -5,65 +5,7 @@ import Footer from "@/components/Footer";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import { useEthersSigner } from "@/ethers-signer";
-
-const abi = [
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: "address", name: "user", type: "address" },
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "randomNumber",
-        type: "uint256",
-      },
-    ],
-    name: "PointsAdded",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: "address", name: "user", type: "address" },
-      {
-        indexed: true,
-        internalType: "uint256",
-        name: "points",
-        type: "uint256",
-      },
-    ],
-    name: "PointsDeducted",
-    type: "event",
-  },
-  {
-    inputs: [{ internalType: "uint256", name: "points", type: "uint256" }],
-    name: "deductPoints",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "address", name: "addr", type: "address" }],
-    name: "getPoints",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "requestPoints",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [{ internalType: "address", name: "", type: "address" }],
-    name: "userPoints",
-    outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
-    stateMutability: "view",
-    type: "function",
-  },
-];
+import abi from "@/abis/points.json";
 
 function Points() {
   const signer = useEthersSigner();
@@ -76,7 +18,7 @@ function Points() {
   // as the points received will be determined by the smart contract, we will need to
   // wait for the transaction to be mined before we can display the result
   // on the spin wheel
-  const [points, setPoints] = useState<null | number>(null);
+  const [points, setPoints] = useState<null | number>(0);
 
   // this is the dummy smart contract that I have deployed to optimism sepolia:
   // 0xE97994805b7a090d7D1222c2bd4C8D7e0799ef93
@@ -92,23 +34,29 @@ function Points() {
 
   const spinWheel = async () => {
     // init contract with the address of the deployed contract
-    const contract = new ethers.Contract(
-      "0xE97994805b7a090d7D1222c2bd4C8D7e0799ef93",
-      abi,
-      signer
-    );
+    try {
+      const contract = new ethers.Contract(
+        "0xE97994805b7a090d7D1222c2bd4C8D7e0799ef93",
+        abi,
+        signer
+      );
 
-    // listen to the event emitted by the contract
-    contract.on("PointsAdded", (addr, randomNumber) => {
-      if (addr === signer?.address) {
-        setPoints(Number(randomNumber));
-        setIsRequesting(false);
-      }
-    });
+      // listen to the event emitted by the contract
+      contract.on("PointsAdded", (addr, randomNumber) => {
+        if (addr === signer?.address) {
+          setPoints(Number(randomNumber));
+          setIsRequesting(false);
+        }
+      });
 
-    setIsRequesting(true);
-    const tx = await contract.requestPoints();
-    await tx.wait();
+      setIsRequesting(true);
+      const tx = await contract.requestPoints();
+      await tx.wait();
+    } catch (e) {
+      console.error(e);
+      setIsRequesting(false);
+      setPoints(0);
+    }
   };
 
   return (
@@ -123,9 +71,20 @@ function Points() {
             used to purchase Polymer Phase 2 NFTs!
           </p>
         </div>
-        <div className="flex-1 p-4">
-          <p>[Spin Wheel Here]</p>
-          {points !== null && <p>Points Added: {points}</p>}
+        <div className="flex-1 p-4 flex flex-col justify-center items-center">
+          <div className="mb-8 relative">
+            <span className="text-3xl absolute left-[50%] z-10 -top-[36px] -ml-[18px]">
+              ⬇️
+            </span>
+            <img
+              src="/assets/spinwheel.svg"
+              alt="spin wheel"
+              className={`w-96 ${
+                isRequesting ? "spinwheel-spin" : `spinwheel-${points}`
+              }`}
+            />
+          </div>
+          {/* {points !== null && <p>Points Added: {points}</p>} */}
 
           <button
             className="bg-black text-white text-center px-4 py-2 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed"
